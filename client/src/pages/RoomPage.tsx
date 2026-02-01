@@ -16,6 +16,7 @@ export default function RoomPage() {
   const [joiningRoom, setJoiningRoom] = useState(false);
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   useEffect(() => {
     if (!roomId) {
@@ -107,8 +108,8 @@ export default function RoomPage() {
   const handleCopyLink = () => {
     const link = window.location.href;
     navigator.clipboard.writeText(link);
-    // TODO: Show toast notification
-    alert('Link copied to clipboard!');
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000); // Reset after 2 seconds
   };
 
   // Name input modal
@@ -203,12 +204,24 @@ export default function RoomPage() {
                 Round {room.currentRoundIndex + 1} of {room.rounds.length}: {room.rounds[room.currentRoundIndex]?.name}
               </p>
             </div>
-            <button
-              onClick={handleCopyLink}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 text-sm"
-            >
-              📋 Copy Room Link
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => navigate('/')}
+                className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 text-sm"
+              >
+                + New Room
+              </button>
+              <button
+                onClick={handleCopyLink}
+                className={`font-semibold py-2 px-4 rounded-lg transition duration-200 text-sm ${
+                  linkCopied
+                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
+              >
+                {linkCopied ? '✓ Copied!' : '📋 Copy Link'}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -242,7 +255,7 @@ export default function RoomPage() {
                       </p>
                     </div>
                   </div>
-                  {hasVoted && currentRound?.status === 'voting' && (
+                  {hasVoted && (
                     <span className="text-green-600 text-xl">✓</span>
                   )}
                 </div>
