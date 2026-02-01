@@ -23,28 +23,43 @@ export default function RoomPage() {
       return;
     }
 
-    // Check if user already has a name saved
-    const savedName = StorageService.getUserName();
-    const savedUserId = StorageService.getUserId();
+    // Wait for socket to connect before joining
+    const attemptJoin = () => {
+      if (!socketService.isConnected()) {
+        console.log('Waiting for socket connection...');
+        setTimeout(attemptJoin, 100); // Retry after 100ms
+        return;
+      }
 
-    if (savedName && savedUserId) {
-      // Try to join the room automatically
-      joinRoom(savedName);
-    } else {
-      // Show name input modal
-      setShowNameModal(true);
-      setLoading(false);
-    }
+      // Socket is connected, set up listeners first
+      console.log('Socket connected, setting up listeners');
+      
+      // Listen for room updates
+      socketService.onRoomUpdate((payload: RoomUpdatePayload) => {
+        console.log('📡 Room update received:', payload.room);
+        setRoom(payload.room);
+      });
 
-    // Listen for room updates
-    socketService.onRoomUpdate((payload: RoomUpdatePayload) => {
-      setRoom(payload.room);
-    });
+      // Listen for new users joining
+      socketService.onUserJoined((data) => {
+        console.log(`👋 ${data.userName} joined the room`);
+      });
 
-    // Listen for new users joining
-    socketService.onUserJoined((data) => {
-      console.log(`${data.userName} joined the room`);
-    });
+      // Now proceed with join logic
+      const savedName = StorageService.getUserName();
+      const savedUserId = StorageService.getUserId();
+
+      if (savedName && savedUserId) {
+        // Try to join the room automatically
+        joinRoom(savedName);
+      } else {
+        // Show name input modal
+        setShowNameModal(true);
+        setLoading(false);
+      }
+    };
+
+    attemptJoin();
 
     // Cleanup listeners on unmount
     return () => {

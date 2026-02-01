@@ -109,12 +109,11 @@ export function registerRoomHandlers(socket: Socket, io: Server) {
 
       // Join the socket to the room
       socket.join(room.id);
+      console.log(`🔌 Socket ${socket.id} joined room ${room.id}`);
 
-      // Notify everyone in the room about the new participant
-      socket.to(room.id).emit('user-joined', {
-        userId,
-        userName: payload.userName.trim(),
-      });
+      // Broadcast updated room state to all participants (including the joiner)
+      const updatePayload: RoomUpdatePayload = { room };
+      io.to(room.id).emit('room-update', updatePayload);
 
       // Send success response
       const response: JoinRoomResponse = {
@@ -146,6 +145,8 @@ export function registerRoomHandlers(socket: Socket, io: Server) {
         socket.emit('error', { message: 'Failed to submit vote' });
         return;
       }
+
+      console.log(`📢 Broadcasting vote update to room ${payload.roomId}`);
 
       // Broadcast room update to all participants
       const updatePayload: RoomUpdatePayload = { room };
