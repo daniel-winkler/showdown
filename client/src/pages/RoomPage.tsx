@@ -88,6 +88,13 @@ export default function RoomPage() {
         StorageService.addRecentRoom(roomId);
         setShowNameModal(false);
         setLoading(false);
+        
+        // Restore selected card if user already voted
+        const currentRound = response.room.rounds[response.room.currentRoundIndex];
+        const existingVote = currentRound?.votes.find(v => v.userId === response.userId);
+        if (existingVote) {
+          setSelectedCard(existingVote.value);
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to join room');

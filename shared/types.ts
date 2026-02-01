@@ -68,6 +68,7 @@ export interface JoinRoomPayload {
 
 export interface SubmitVotePayload {
   roomId: string;
+  userId: string;
   vote: number;
 }
 
