@@ -17,9 +17,8 @@ class SocketService {
       return this.socket;
     }
 
-    // In development, use relative path to leverage Vite's proxy
-    // In production, you'd set VITE_SOCKET_URL env variable
-    const socketUrl = url || import.meta.env.VITE_SOCKET_URL || window.location.origin;
+    // Connect directly to backend in development, use env variable in production
+    const socketUrl = url || import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
 
     this.socket = io(socketUrl, {
       transports: ['websocket', 'polling'],
