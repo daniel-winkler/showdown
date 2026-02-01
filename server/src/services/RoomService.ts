@@ -29,6 +29,8 @@ class RoomService {
       name: payload.userName,
       isCreator: true,
       connectedAt: new Date(),
+      isOnline: true,
+      socketId: undefined, // Will be set when socket joins
     };
 
     // Create rounds
@@ -98,6 +100,8 @@ class RoomService {
     const existingParticipant = room.participants.find(p => p.name === userName);
     if (existingParticipant) {
       console.log(`ℹ️  ${userName} already in room: ${roomId}, returning existing user`);
+      // Mark as online when rejoining
+      existingParticipant.isOnline = true;
       return { room, userId: existingParticipant.id };
     }
 
@@ -110,6 +114,8 @@ class RoomService {
       name: userName,
       isCreator: false,
       connectedAt: new Date(),
+      isOnline: true,
+      socketId: undefined,
     };
 
     // Add to participants list
@@ -131,6 +137,39 @@ class RoomService {
 
     room.participants = room.participants.filter((p) => p.id !== userId);
     console.log(`👋 User ${userId} left room: ${roomId}`);
+
+    return room;
+  }
+
+  /**
+   * Marks a participant as online and updates their socket ID
+   */
+  setParticipantOnline(roomId: string, userId: string, socketId: string): Room | null {
+    const room = this.rooms.get(roomId);
+    if (!room) return null;
+
+    const participant = room.participants.find(p => p.id === userId);
+    if (participant) {
+      participant.isOnline = true;
+      participant.socketId = socketId;
+    }
+
+    return room;
+  }
+
+  /**
+   * Marks a participant as offline
+   */
+  setParticipantOffline(roomId: string, socketId: string): Room | null {
+    const room = this.rooms.get(roomId);
+    if (!room) return null;
+
+    const participant = room.participants.find(p => p.socketId === socketId);
+    if (participant) {
+      participant.isOnline = false;
+      participant.socketId = undefined;
+      console.log(`🔌 ${participant.name} went offline in room ${roomId}`);
+    }
 
     return room;
   }

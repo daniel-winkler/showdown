@@ -111,6 +111,9 @@ export function registerRoomHandlers(socket: Socket, io: Server) {
       socket.join(room.id);
       console.log(`🔌 Socket ${socket.id} joined room ${room.id}`);
 
+      // Mark participant as online with their socket ID
+      roomService.setParticipantOnline(room.id, userId, socket.id);
+
       // Broadcast updated room state to all participants (including the joiner)
       const updatePayload: RoomUpdatePayload = { room };
       io.to(room.id).emit('room-update', updatePayload);

@@ -19,6 +19,8 @@ export interface Participant {
   name: string;                  // Display name
   isCreator: boolean;            // True if this user created the room
   connectedAt: Date;
+  isOnline: boolean;             // True if currently connected via socket
+  socketId?: string;             // Current socket ID if online
 }
 
 export interface Vote {

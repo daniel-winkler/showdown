@@ -241,8 +241,15 @@ export default function RoomPage() {
                   className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                 >
                   <div className="flex items-center">
-                    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
+                    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold mr-3 relative">
                       {participant.name.charAt(0).toUpperCase()}
+                      {/* Online status indicator */}
+                      <div
+                        className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                          participant.isOnline ? 'bg-green-500' : 'bg-gray-300'
+                        }`}
+                        title={participant.isOnline ? 'Online' : 'Offline'}
+                      />
                     </div>
                     <div>
                       <p className="font-medium text-gray-800">

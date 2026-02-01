@@ -3,6 +3,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import { registerRoomHandlers } from './handlers/roomHandlers.js';
+import { roomService } from './services/RoomService.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -29,6 +30,16 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log(`Client disconnected: ${socket.id}`);
+    
+    // Mark user as offline in all rooms they're in
+    const allRooms = roomService.getAllRooms();
+    for (const room of allRooms) {
+      const updatedRoom = roomService.setParticipantOffline(room.id, socket.id);
+      if (updatedRoom) {
+        // Broadcast updated room state
+        io.to(room.id).emit('room-update', { room: updatedRoom });
+      }
+    }
   });
 });
 
