@@ -1,7 +1,7 @@
 const STORAGE_KEYS = {
-  USER_NAME: 'planningPoker_userName',
-  USER_ID: 'planningPoker_userId',
-  RECENT_ROOMS: 'planningPoker_recentRooms',
+  USER_NAME: 'planitPoker_userName',
+  USER_ID: 'planitPoker_userId',
+  RECENT_ROOMS: 'planitPoker_recentRooms',
 } as const;
 
 export const StorageService = {

@@ -1,7 +1,7 @@
 {
-  "name": "plannitpoker-client",
+  "name": "planitpoker-client",
   "version": "1.0.0",
-  "description": "Frontend for PlannitPoker",
+  "description": "Frontend for PlanitPoker",
   "type": "module",
   "scripts": {
     "dev": "vite",

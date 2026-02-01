@@ -1,4 +1,4 @@
-# PlannitPoker
+# PlanitPoker
 
 A real-time collaborative Planning Poker web application for agile development teams.
 
@@ -20,7 +20,7 @@ A real-time collaborative Planning Poker web application for agile development t
 ## Project Structure
 
 ```
-PlannitPoker/
+PlanitPoker/
 ├── client/          # React frontend
 ├── server/          # Node.js backend
 ├── shared/          # Shared TypeScript types

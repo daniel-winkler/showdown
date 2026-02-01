@@ -1,5 +1,5 @@
 /**
- * Shared TypeScript types for PlannitPoker
+ * Shared TypeScript types for PlanitPoker
  * Used by both client and server to ensure type safety
  */
 

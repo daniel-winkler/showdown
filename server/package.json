@@ -1,7 +1,7 @@
 {
-  "name": "plannitpoker-server",
+  "name": "planitpoker-server",
   "version": "1.0.0",
-  "description": "Backend server for PlannitPoker",
+  "description": "Backend server for PlanitPoker",
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
