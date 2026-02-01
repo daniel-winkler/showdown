@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { socketService } from '../services/socket';
 import { StorageService } from '../utils/storage';
-import type { Room } from '@shared/types';
+import type { Room, RoomUpdatePayload } from '@shared/types';
 
 export default function RoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
@@ -14,6 +14,8 @@ export default function RoomPage() {
   const [showNameModal, setShowNameModal] = useState(false);
   const [userName, setUserName] = useState(StorageService.getUserName() || '');
   const [joiningRoom, setJoiningRoom] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<number | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!roomId) {
@@ -33,6 +35,21 @@ export default function RoomPage() {
       setShowNameModal(true);
       setLoading(false);
     }
+
+    // Listen for room updates
+    socketService.onRoomUpdate((payload: RoomUpdatePayload) => {
+      setRoom(payload.room);
+    });
+
+    // Listen for new users joining
+    socketService.onUserJoined((data) => {
+      console.log(`${data.userName} joined the room`);
+    });
+
+    // Cleanup listeners on unmount
+    return () => {
+      socketService.removeAllListeners();
+    };
   }, [roomId]);
 
   const joinRoom = async (name: string) => {
@@ -49,6 +66,7 @@ export default function RoomPage() {
 
       if (response.success && response.room && response.userId) {
         setRoom(response.room);
+        setCurrentUserId(response.userId);
         StorageService.saveUserName(name.trim());
         StorageService.saveUserId(response.userId);
         StorageService.addRecentRoom(roomId);
@@ -185,36 +203,83 @@ export default function RoomPage() {
             Participants ({room.participants.length})
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {room.participants.map((participant) => (
-              <div
-                key={participant.id}
-                className="flex items-center p-3 bg-gray-50 rounded-lg"
-              >
-                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
-                  {participant.name.charAt(0).toUpperCase()}
+            {room.participants.map((participant) => {
+              const currentRound = room.rounds[room.currentRoundIndex];
+              const hasVoted = currentRound?.votes.some(v => v.userId === participant.id);
+              
+              return (
+                <div
+                  key={participant.id}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                >
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
+                      {participant.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800">
+                        {participant.name}
+                        {participant.isCreator && (
+                          <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">
+                            Host
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  {hasVoted && currentRound?.status === 'voting' && (
+                    <span className="text-green-600 text-xl">✓</span>
+                  )}
                 </div>
-                <div>
-                  <p className="font-medium text-gray-800">
-                    {participant.name}
-                    {participant.isCreator && (
-                      <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">
-                        Host
-                      </span>
-                    )}
-                  </p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
-        {/* Voting area - Coming in next commits */}
+        {/* Voting Area */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <p className="text-gray-600 text-center">
-            Voting interface coming soon...
-          </p>
+          {room.rounds[room.currentRoundIndex]?.status === 'voting' ? (
+            <>
+              <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">
+                Select Your Card
+              </h2>
+              <div className="flex flex-wrap justify-center gap-4">
+                {room.settings.cardValues.map((value) => (
+                  <button
+                    key={value}
+                    onClick={() => handleCardSelect(value)}
+                    className={`w-20 h-28 rounded-lg border-2 flex items-center justify-center text-3xl font-bold transition-all duration-200 hover:scale-105 ${
+                      selectedCard === value
+                        ? 'border-blue-600 bg-blue-500 text-white shadow-lg scale-105'
+                        : 'border-gray-300 bg-white text-gray-800 hover:border-blue-400'
+                    }`}
+                  >
+                    {value}
+                  </button>
+                ))}
+              </div>
+              <p className="text-center text-gray-600 mt-4 text-sm">
+                {selectedCard !== null ? `You selected: ${selectedCard}` : 'Choose a card to vote'}
+              </p>
+            </>
+          ) : (
+            <p className="text-gray-600 text-center">
+              Results reveal coming in next commit...
+            </p>
+          )}
         </div>
       </div>
     </div>
   );
+
+  function handleCardSelect(value: number) {
+    if (!roomId || !currentUserId) return;
+    
+    setSelectedCard(value);
+    socketService.submitVote({
+      roomId,
+      userId: currentUserId,
+      vote: value,
+    });
+  }
 }

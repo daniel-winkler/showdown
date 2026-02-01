@@ -4,6 +4,8 @@ import type {
   RoomCreatedResponse,
   JoinRoomPayload,
   JoinRoomResponse,
+  SubmitVotePayload,
+  RoomUpdatePayload,
 } from '@shared/types';
 
 class SocketService {
@@ -98,6 +100,41 @@ class SocketService {
         }
       });
     });
+  }
+
+  /**
+   * Submits a vote for the current round
+   */
+  submitVote(payload: SubmitVotePayload): void {
+    if (!this.socket) {
+      console.error('Socket not connected');
+      return;
+    }
+    this.socket.emit('submit-vote', payload);
+  }
+
+  /**
+   * Listens for room updates
+   */
+  onRoomUpdate(callback: (payload: RoomUpdatePayload) => void): void {
+    if (!this.socket) return;
+    this.socket.on('room-update', callback);
+  }
+
+  /**
+   * Listens for user joined events
+   */
+  onUserJoined(callback: (data: { userId: string; userName: string }) => void): void {
+    if (!this.socket) return;
+    this.socket.on('user-joined', callback);
+  }
+
+  /**
+   * Removes all event listeners
+   */
+  removeAllListeners(): void {
+    if (!this.socket) return;
+    this.socket.removeAllListeners();
   }
 }
 

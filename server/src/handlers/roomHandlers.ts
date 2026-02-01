@@ -1,13 +1,15 @@
-import { Socket } from 'socket.io';
+import { Socket, Server } from 'socket.io';
 import { roomService } from '../services/RoomService.js';
 import type {
   CreateRoomPayload,
   RoomCreatedResponse,
   JoinRoomPayload,
   JoinRoomResponse,
+  SubmitVotePayload,
+  RoomUpdatePayload,
 } from '../../../shared/types';
 
-export function registerRoomHandlers(socket: Socket) {
+export function registerRoomHandlers(socket: Socket, io: Server) {
   // Handle room creation
   socket.on('create-room', (payload: CreateRoomPayload, callback) => {
     try {
@@ -130,6 +132,39 @@ export function registerRoomHandlers(socket: Socket) {
         error: 'Failed to join room',
       };
       callback(response);
+    }
+  });
+
+  // Handle vote submission
+  socket.on('submit-vote', (payload: SubmitVotePayload) => {
+    try {
+      console.log(`🗳️  Vote submission: User in room ${payload.roomId}`);
+
+      // Submit vote
+      const room = roomService.submitVote(payload.roomId, payload.userId, payload.vote);
+      if (!room) {
+        socket.emit('error', { message: 'Failed to submit vote' });
+        return;
+      }
+
+      // Broadcast room update to all participants
+      const updatePayload: RoomUpdatePayload = { room };
+      io.to(payload.roomId).emit('room-update', updatePayload);
+
+      // Check if all participants have voted
+      if (roomService.allVoted(payload.roomId)) {
+        console.log(`✅ All participants voted in room ${payload.roomId}`);
+        
+        // Auto-reveal votes
+        const updatedRoom = roomService.revealVotes(payload.roomId);
+        if (updatedRoom) {
+          const revealPayload: RoomUpdatePayload = { room: updatedRoom };
+          io.to(payload.roomId).emit('room-update', revealPayload);
+        }
+      }
+    } catch (error) {
+      console.error('Error submitting vote:', error);
+      socket.emit('error', { message: 'Failed to submit vote' });
     }
   });
 }

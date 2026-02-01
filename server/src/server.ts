@@ -25,7 +25,7 @@ io.on('connection', (socket) => {
   console.log(`Client connected: ${socket.id}`);
 
   // Register event handlers
-  registerRoomHandlers(socket);
+  registerRoomHandlers(socket, io);
 
   socket.on('disconnect', () => {
     console.log(`Client disconnected: ${socket.id}`);

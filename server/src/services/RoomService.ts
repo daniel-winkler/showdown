@@ -94,6 +94,13 @@ class RoomService {
       return null;
     }
 
+    // Check if participant with this name already exists
+    const existingParticipant = room.participants.find(p => p.name === userName);
+    if (existingParticipant) {
+      console.log(`ℹ️  ${userName} already in room: ${roomId}, returning existing user`);
+      return { room, userId: existingParticipant.id };
+    }
+
     // Generate new user ID
     const userId = uuidv4();
 
@@ -124,6 +131,86 @@ class RoomService {
 
     room.participants = room.participants.filter((p) => p.id !== userId);
     console.log(`👋 User ${userId} left room: ${roomId}`);
+
+    return room;
+  }
+
+  /**
+   * Submits a vote for the current round
+   */
+  submitVote(roomId: string, userId: string, vote: number): Room | null {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      return null;
+    }
+
+    const currentRound = room.rounds[room.currentRoundIndex];
+    if (!currentRound) {
+      return null;
+    }
+
+    // Find participant
+    const participant = room.participants.find((p) => p.id === userId);
+    if (!participant) {
+      return null;
+    }
+
+    // Check if user already voted, update or add
+    const existingVoteIndex = currentRound.votes.findIndex((v) => v.userId === userId);
+    const voteData = {
+      userId,
+      userName: participant.name,
+      value: vote,
+      votedAt: new Date(),
+    };
+
+    if (existingVoteIndex >= 0) {
+      currentRound.votes[existingVoteIndex] = voteData;
+    } else {
+      currentRound.votes.push(voteData);
+    }
+
+    console.log(`🗳️  ${participant.name} voted ${vote} in room ${roomId}`);
+
+    // Check if all participants have voted
+    if (currentRound.votes.length === room.participants.length && room.status === 'waiting') {
+      room.status = 'active';
+    }
+
+    return room;
+  }
+
+  /**
+   * Checks if all participants in a room have voted
+   */
+  allVoted(roomId: string): boolean {
+    const room = this.rooms.get(roomId);
+    if (!room) return false;
+
+    const currentRound = room.rounds[room.currentRoundIndex];
+    if (!currentRound) return false;
+
+    return currentRound.votes.length === room.participants.length;
+  }
+
+  /**
+   * Reveals votes for the current round
+   */
+  revealVotes(roomId: string): Room | null {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      return null;
+    }
+
+    const currentRound = room.rounds[room.currentRoundIndex];
+    if (!currentRound) {
+      return null;
+    }
+
+    currentRound.status = 'revealed';
+    currentRound.revealedAt = new Date();
+
+    console.log(`👁️  Votes revealed for room ${roomId}`);
 
     return room;
   }
