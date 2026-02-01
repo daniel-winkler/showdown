@@ -2,6 +2,8 @@ import { io, Socket } from 'socket.io-client';
 import type { 
   CreateRoomPayload, 
   RoomCreatedResponse,
+  JoinRoomPayload,
+  JoinRoomResponse,
 } from '@shared/types';
 
 class SocketService {
@@ -73,6 +75,26 @@ class SocketService {
           resolve(response);
         } else {
           reject(new Error(response.error || 'Failed to create room'));
+        }
+      });
+    });
+  }
+
+  /**
+   * Joins an existing room
+   */
+  joinRoom(payload: JoinRoomPayload): Promise<JoinRoomResponse> {
+    return new Promise((resolve, reject) => {
+      if (!this.socket) {
+        reject(new Error('Socket not connected'));
+        return;
+      }
+
+      this.socket.emit('join-room', payload, (response: JoinRoomResponse) => {
+        if (response.success) {
+          resolve(response);
+        } else {
+          reject(new Error(response.error || 'Failed to join room'));
         }
       });
     });

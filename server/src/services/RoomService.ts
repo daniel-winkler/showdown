@@ -84,6 +84,49 @@ class RoomService {
   deleteRoom(roomId: string): boolean {
     return this.rooms.delete(roomId);
   }
+
+  /**
+   * Adds a participant to a room
+   */
+  addParticipant(roomId: string, userName: string): { room: Room; userId: string } | null {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      return null;
+    }
+
+    // Generate new user ID
+    const userId = uuidv4();
+
+    // Create participant
+    const participant: Participant = {
+      id: userId,
+      name: userName,
+      isCreator: false,
+      connectedAt: new Date(),
+    };
+
+    // Add to participants list
+    room.participants.push(participant);
+
+    console.log(`✅ ${userName} joined room: ${roomId}`);
+
+    return { room, userId };
+  }
+
+  /**
+   * Removes a participant from a room
+   */
+  removeParticipant(roomId: string, userId: string): Room | null {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      return null;
+    }
+
+    room.participants = room.participants.filter((p) => p.id !== userId);
+    console.log(`👋 User ${userId} left room: ${roomId}`);
+
+    return room;
+  }
 }
 
 // Export singleton instance
