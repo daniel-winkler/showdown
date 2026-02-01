@@ -2,6 +2,7 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import { registerRoomHandlers } from './handlers/roomHandlers.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -22,6 +23,9 @@ const io = new Server(httpServer, {
 // Socket.IO connection handler
 io.on('connection', (socket) => {
   console.log(`Client connected: ${socket.id}`);
+
+  // Register event handlers
+  registerRoomHandlers(socket);
 
   socket.on('disconnect', () => {
     console.log(`Client disconnected: ${socket.id}`);
