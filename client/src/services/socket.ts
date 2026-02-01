@@ -1,15 +1,23 @@
 import { io, Socket } from 'socket.io-client';
+import type { 
+  CreateRoomPayload, 
+  RoomCreatedResponse,
+} from '@shared/types';
 
 class SocketService {
   private socket: Socket | null = null;
   private connected: boolean = false;
 
-  connect(url: string = 'http://localhost:3001'): Socket {
+  connect(url?: string): Socket {
     if (this.socket?.connected) {
       return this.socket;
     }
 
-    this.socket = io(url, {
+    // In development, use relative path to leverage Vite's proxy
+    // In production, you'd set VITE_SOCKET_URL env variable
+    const socketUrl = url || import.meta.env.VITE_SOCKET_URL || window.location.origin;
+
+    this.socket = io(socketUrl, {
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionDelay: 1000,
@@ -48,6 +56,26 @@ class SocketService {
 
   isConnected(): boolean {
     return this.connected && this.socket?.connected === true;
+  }
+
+  /**
+   * Creates a new room
+   */
+  createRoom(payload: CreateRoomPayload): Promise<RoomCreatedResponse> {
+    return new Promise((resolve, reject) => {
+      if (!this.socket) {
+        reject(new Error('Socket not connected'));
+        return;
+      }
+
+      this.socket.emit('create-room', payload, (response: RoomCreatedResponse) => {
+        if (response.success) {
+          resolve(response);
+        } else {
+          reject(new Error(response.error || 'Failed to create room'));
+        }
+      });
+    });
   }
 }
 

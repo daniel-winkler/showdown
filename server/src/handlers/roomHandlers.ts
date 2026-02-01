@@ -4,7 +4,7 @@ import type {
   CreateRoomPayload,
   RoomCreatedResponse,
   SOCKET_EVENTS,
-} from '../../shared/types.js';
+} from '../../../shared/types';
 
 export function registerRoomHandlers(socket: Socket) {
   // Handle room creation

@@ -5,8 +5,13 @@ import type {
   Participant,
   CreateRoomPayload,
   RoomSettings,
-  DEFAULT_ROOM_SETTINGS,
-} from '../../shared/types.js';
+} from '../../../shared/types';
+
+// Default settings
+const DEFAULT_ROOM_SETTINGS: RoomSettings = {
+  anonymous: false,
+  cardValues: [1, 3, 5, 8, 13, 21],
+};
 
 class RoomService {
   private rooms: Map<string, Room> = new Map();

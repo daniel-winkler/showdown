@@ -1,0 +1,166 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { socketService } from '../services/socket';
+import { StorageService } from '../utils/storage';
+
+export default function CreateRoom() {
+  const navigate = useNavigate();
+  const [userName, setUserName] = useState(StorageService.getUserName() || '');
+  const [roomName, setRoomName] = useState('');
+  const [numRounds, setNumRounds] = useState(5);
+  const [roundNames, setRoundNames] = useState<string[]>(
+    Array.from({ length: 5 }, (_, i) => `Round ${i + 1}`)
+  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleNumRoundsChange = (num: number) => {
+    setNumRounds(num);
+    setRoundNames((prev) => {
+      const newRounds = Array.from({ length: num }, (_, i) => 
+        prev[i] || `Round ${i + 1}`
+      );
+      return newRounds;
+    });
+  };
+
+  const handleRoundNameChange = (index: number, value: string) => {
+    setRoundNames((prev) => {
+      const updated = [...prev];
+      updated[index] = value;
+      return updated;
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!userName.trim()) {
+      setError('Please enter your name');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await socketService.createRoom({
+        userName: userName.trim(),
+        roomName: roomName.trim() || undefined,
+        roundNames: roundNames.map(name => name.trim() || 'Untitled Round'),
+      });
+
+      if (response.success && response.room && response.userId) {
+        // Save user info to localStorage
+        StorageService.saveUserName(userName.trim());
+        StorageService.saveUserId(response.userId);
+        StorageService.addRecentRoom(response.room.id);
+
+        // Navigate to room
+        navigate(`/room/${response.room.id}`);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create room');
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-lg shadow-xl p-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2 text-center">
+            Create Planning Poker Room
+          </h1>
+          <p className="text-gray-600 text-center mb-8">
+            Set up your estimation session
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* User Name */}
+            <div>
+              <label htmlFor="userName" className="block text-sm font-medium text-gray-700 mb-2">
+                Your Name *
+              </label>
+              <input
+                type="text"
+                id="userName"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                placeholder="Enter your name"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+            </div>
+
+            {/* Room Name (Optional) */}
+            <div>
+              <label htmlFor="roomName" className="block text-sm font-medium text-gray-700 mb-2">
+                Room Name (Optional)
+              </label>
+              <input
+                type="text"
+                id="roomName"
+                value={roomName}
+                onChange={(e) => setRoomName(e.target.value)}
+                placeholder="e.g., Sprint 24 Planning"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Number of Rounds */}
+            <div>
+              <label htmlFor="numRounds" className="block text-sm font-medium text-gray-700 mb-2">
+                Number of Rounds
+              </label>
+              <input
+                type="number"
+                id="numRounds"
+                value={numRounds}
+                onChange={(e) => handleNumRoundsChange(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
+                min="1"
+                max="20"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Round Names */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Round Names
+              </label>
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {roundNames.map((name, index) => (
+                  <input
+                    key={index}
+                    type="text"
+                    value={name}
+                    onChange={(e) => handleRoundNameChange(index, e.target.value)}
+                    placeholder={`Round ${index + 1}`}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-800 text-sm">{error}</p>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Creating Room...' : 'Create Room'}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
