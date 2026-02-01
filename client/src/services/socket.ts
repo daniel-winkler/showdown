@@ -1,0 +1,55 @@
+import { io, Socket } from 'socket.io-client';
+
+class SocketService {
+  private socket: Socket | null = null;
+  private connected: boolean = false;
+
+  connect(url: string = 'http://localhost:3001'): Socket {
+    if (this.socket?.connected) {
+      return this.socket;
+    }
+
+    this.socket = io(url, {
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5,
+    });
+
+    this.socket.on('connect', () => {
+      console.log('✅ Connected to server:', this.socket?.id);
+      this.connected = true;
+    });
+
+    this.socket.on('disconnect', () => {
+      console.log('❌ Disconnected from server');
+      this.connected = false;
+    });
+
+    this.socket.on('connect_error', (error) => {
+      console.error('Connection error:', error.message);
+      this.connected = false;
+    });
+
+    return this.socket;
+  }
+
+  disconnect(): void {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+      this.connected = false;
+    }
+  }
+
+  getSocket(): Socket | null {
+    return this.socket;
+  }
+
+  isConnected(): boolean {
+    return this.connected && this.socket?.connected === true;
+  }
+}
+
+// Export singleton instance
+export const socketService = new SocketService();
