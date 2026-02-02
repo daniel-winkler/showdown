@@ -62,21 +62,9 @@ export default function VotingResults({ votes }: VotingResultsProps) {
       </div>
 
       {/* Statistics */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-blue-50 rounded-lg p-4 text-center">
-          <p className="text-sm text-gray-600 mb-1">Average</p>
-          <p className="text-2xl font-bold text-blue-600">{stats.average}</p>
-        </div>
-        
-        <div className="bg-amber-50 rounded-lg p-4 text-center">
-          <p className="text-sm text-gray-600 mb-1">Min</p>
-          <p className="text-2xl font-bold text-amber-600">{stats.min}</p>
-        </div>
-        
-        <div className="bg-red-50 rounded-lg p-4 text-center">
-          <p className="text-sm text-gray-600 mb-1">Max</p>
-          <p className="text-2xl font-bold text-red-600">{stats.max}</p>
-        </div>
+      <div className="bg-blue-50 rounded-lg p-4 text-center">
+        <p className="text-sm text-gray-600 mb-1">Average</p>
+        <p className="text-2xl font-bold text-blue-600">{stats.average}</p>
       </div>
 
       {/* Most Common Vote - only show if there's an actual most common (more than 1 vote) */}
@@ -142,8 +130,6 @@ function calculateStatistics(votes: Vote[]) {
   if (votes.length === 0) {
     return {
       average: 0,
-      min: 0,
-      max: 0,
       mostCommon: null,
       mostCommonCount: 0,
       consensus: false,
@@ -157,10 +143,6 @@ function calculateStatistics(votes: Vote[]) {
   // Average
   const sum = values.reduce((acc, val) => acc + val, 0);
   const average = values.length > 0 ? Math.round((sum / values.length) * 10) / 10 : 0;
-
-  // Min and Max
-  const min = values.length > 0 ? values[0] : 0;
-  const max = values.length > 0 ? values[values.length - 1] : 0;
 
   // Most common vote (all votes, not just numeric)
   const allValues = votes.map(v => v.value);
@@ -183,8 +165,6 @@ function calculateStatistics(votes: Vote[]) {
 
   return {
     average,
-    min,
-    max,
     mostCommon,
     mostCommonCount: maxFrequency,
     consensus,
