@@ -7,9 +7,9 @@ export default function CreateRoom() {
   const navigate = useNavigate();
   const [userName, setUserName] = useState(StorageService.getUserName() || '');
   const [roomName, setRoomName] = useState('');
-  const [numRounds, setNumRounds] = useState(5);
+  const [numRounds, setNumRounds] = useState(3);
   const [roundNames, setRoundNames] = useState<string[]>(
-    Array.from({ length: 5 }, (_, i) => `Round ${i + 1}`)
+    Array.from({ length: 3 }, (_, i) => `Round ${i + 1}`)
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

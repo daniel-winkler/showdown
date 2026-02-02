@@ -7,7 +7,7 @@ interface VotingResultsProps {
 
 interface VoteDistribution {
   name: string;
-  value: number;
+  value: number | string;
   count: number;
   percentage: number;
 }
@@ -110,7 +110,7 @@ export default function VotingResults({ votes }: VotingResultsProps) {
 
 // Helper function to calculate vote distribution
 function calculateDistribution(votes: Vote[]): VoteDistribution[] {
-  const voteMap = new Map<number, number>();
+  const voteMap = new Map<number | string, number>();
   
   // Count votes for each value
   votes.forEach(vote => {
@@ -123,15 +123,23 @@ function calculateDistribution(votes: Vote[]): VoteDistribution[] {
 
   voteMap.forEach((count, value) => {
     distribution.push({
-      name: `${value} points`,
+      name: typeof value === 'number' ? `${value} points` : String(value),
       value,
       count,
       percentage: Math.round((count / total) * 100 * 10) / 10, // Round to 1 decimal
     });
   });
 
-  // Sort by vote value
-  return distribution.sort((a, b) => a.value - b.value);
+  // Sort by vote value (numbers first, then strings)
+  return distribution.sort((a, b) => {
+    const aIsNum = typeof a.value === 'number';
+    const bIsNum = typeof b.value === 'number';
+    
+    if (aIsNum && bIsNum) return (a.value as number) - (b.value as number);
+    if (aIsNum) return -1;
+    if (bIsNum) return 1;
+    return String(a.value).localeCompare(String(b.value));
+  });
 }
 
 // Helper function to calculate statistics
@@ -147,29 +155,34 @@ function calculateStatistics(votes: Vote[]) {
     };
   }
 
-  const values = votes.map(v => v.value).sort((a, b) => a - b);
+  // Filter only numeric votes for statistical calculations
+  const numericVotes = votes.filter(v => typeof v.value === 'number');
+  const values = numericVotes.map(v => v.value as number).sort((a, b) => a - b);
   
   // Average
   const sum = values.reduce((acc, val) => acc + val, 0);
-  const average = Math.round((sum / values.length) * 10) / 10;
+  const average = values.length > 0 ? Math.round((sum / values.length) * 10) / 10 : 0;
 
   // Median
   const mid = Math.floor(values.length / 2);
-  const median = values.length % 2 === 0
-    ? (values[mid - 1] + values[mid]) / 2
-    : values[mid];
+  const median = values.length > 0
+    ? (values.length % 2 === 0
+      ? (values[mid - 1] + values[mid]) / 2
+      : values[mid])
+    : 0;
 
   // Min and Max
-  const min = values[0];
-  const max = values[values.length - 1];
+  const min = values.length > 0 ? values[0] : 0;
+  const max = values.length > 0 ? values[values.length - 1] : 0;
 
-  // Most common vote
-  const frequency = new Map<number, number>();
-  values.forEach(val => {
+  // Most common vote (all votes, not just numeric)
+  const allValues = votes.map(v => v.value);
+  const frequency = new Map<number | string, number>();
+  allValues.forEach(val => {
     frequency.set(val, (frequency.get(val) || 0) + 1);
   });
   
-  let mostCommon = values[0];
+  let mostCommon: number | string | null = allValues[0];
   let maxFrequency = 0;
   frequency.forEach((count, value) => {
     if (count > maxFrequency) {
@@ -179,7 +192,7 @@ function calculateStatistics(votes: Vote[]) {
   });
 
   // Consensus check (all votes are the same)
-  const consensus = new Set(values).size === 1;
+  const consensus = new Set(allValues).size === 1;
 
   return {
     average,

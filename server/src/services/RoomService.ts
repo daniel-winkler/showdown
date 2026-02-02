@@ -10,7 +10,7 @@ import type {
 // Default settings
 const DEFAULT_ROOM_SETTINGS: RoomSettings = {
   anonymous: false,
-  cardValues: [1, 3, 5, 8, 13, 21],
+  cardValues: [0.5, 1, 3, 5, 8, 13, 21, '☕', '?'],
 };
 
 class RoomService {
@@ -177,7 +177,7 @@ class RoomService {
   /**
    * Submits a vote for the current round
    */
-  submitVote(roomId: string, userId: string, vote: number): Room | null {
+  submitVote(roomId: string, userId: string, vote: number | string): Room | null {
     const room = this.rooms.get(roomId);
     if (!room) {
       return null;

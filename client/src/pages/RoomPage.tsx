@@ -15,7 +15,7 @@ export default function RoomPage() {
   const [showNameModal, setShowNameModal] = useState(false);
   const [userName, setUserName] = useState(StorageService.getUserName() || '');
   const [joiningRoom, setJoiningRoom] = useState(false);
-  const [selectedCard, setSelectedCard] = useState<number | null>(null);
+  const [selectedCard, setSelectedCard] = useState<number | string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
 
@@ -373,7 +373,7 @@ export default function RoomPage() {
     return room?.participants.find(p => p.id === currentUserId)?.isCreator || false;
   }
 
-  function handleCardSelect(value: number) {
+  function handleCardSelect(value: number | string) {
     if (!roomId || !currentUserId) return;
     
     setSelectedCard(value);

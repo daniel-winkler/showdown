@@ -11,7 +11,7 @@ export type RoundStatus = 'voting' | 'revealed';
 
 export interface RoomSettings {
   anonymous: boolean;           // Show participant names or not
-  cardValues: number[];          // Available card values (default: Fibonacci)
+  cardValues: (number | string)[];  // Available card values (numbers, emoji, or "?")
 }
 
 export interface Participant {
@@ -26,7 +26,7 @@ export interface Participant {
 export interface Vote {
   userId: string;
   userName: string;
-  value: number;
+  value: number | string;
   votedAt: Date;
 }
 
@@ -69,7 +69,7 @@ export interface JoinRoomPayload {
 export interface SubmitVotePayload {
   roomId: string;
   userId: string;
-  vote: number;
+  vote: number | string;
 }
 
 export interface RevealVotesPayload {
@@ -129,7 +129,7 @@ export interface VoteStatistics {
 
 // ==================== Constants ====================
 
-export const DEFAULT_CARD_VALUES = [1, 3, 5, 8, 13, 21];
+export const DEFAULT_CARD_VALUES = [0.5, 1, 3, 5, 8, 13, 21, '☕', '?'];
 
 export const DEFAULT_ROOM_SETTINGS: RoomSettings = {
   anonymous: false,
