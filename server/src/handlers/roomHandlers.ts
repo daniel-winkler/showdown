@@ -7,6 +7,7 @@ import type {
   JoinRoomResponse,
   SubmitVotePayload,
   RoomUpdatePayload,
+  NextRoundPayload,
 } from '../../../shared/types';
 
 export function registerRoomHandlers(socket: Socket, io: Server) {
@@ -194,6 +195,38 @@ export function registerRoomHandlers(socket: Socket, io: Server) {
     } catch (error) {
       console.error('Error revealing votes:', error);
       socket.emit('error', { message: 'Failed to reveal votes' });
+    }
+  });
+
+  // Handle next round (host only)
+  socket.on('next-round', (payload: NextRoundPayload) => {
+    try {
+      console.log(`➡️  Next round request for room ${payload.roomId}`);
+
+      // Get the room
+      const room = roomService.getRoom(payload.roomId);
+      if (!room) {
+        socket.emit('error', { message: 'Room not found' });
+        return;
+      }
+
+      // Check if the user is the creator (host)
+      const participant = room.participants.find(p => p.id === payload.userId);
+      if (!participant || !participant.isCreator) {
+        socket.emit('error', { message: 'Only the host can move to next round' });
+        return;
+      }
+
+      // Move to next round
+      const updatedRoom = roomService.nextRound(payload.roomId);
+      if (updatedRoom) {
+        console.log(`✅ Moved to next round in room ${payload.roomId}`);
+        const updatePayload: RoomUpdatePayload = { room: updatedRoom };
+        io.to(payload.roomId).emit('room-update', updatePayload);
+      }
+    } catch (error) {
+      console.error('Error moving to next round:', error);
+      socket.emit('error', { message: 'Failed to move to next round' });
     }
   });
 }

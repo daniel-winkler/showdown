@@ -253,6 +253,36 @@ class RoomService {
 
     return room;
   }
+
+  /**
+   * Advances to the next round
+   */
+  nextRound(roomId: string): Room | null {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      return null;
+    }
+
+    // Check if there are more rounds
+    if (room.currentRoundIndex >= room.rounds.length - 1) {
+      // Last round - mark room as completed
+      room.status = 'completed';
+      console.log(`🏁 All rounds completed in room ${roomId}`);
+      return room;
+    }
+
+    // Move to next round
+    room.currentRoundIndex++;
+    const nextRound = room.rounds[room.currentRoundIndex];
+    
+    // Reset round status to voting
+    nextRound.status = 'voting';
+    nextRound.votes = [];
+
+    console.log(`➡️  Moved to round ${room.currentRoundIndex + 1} in room ${roomId}`);
+
+    return room;
+  }
 }
 
 // Export singleton instance

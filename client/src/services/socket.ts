@@ -124,6 +124,17 @@ class SocketService {
   }
 
   /**
+   * Moves to the next round (host only)
+   */
+  nextRound(payload: { roomId: string; userId: string }): void {
+    if (!this.socket) {
+      console.error('Socket not connected');
+      return;
+    }
+    this.socket.emit('next-round', payload);
+  }
+
+  /**
    * Listens for room updates
    */
   onRoomUpdate(callback: (payload: RoomUpdatePayload) => void): void {

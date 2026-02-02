@@ -79,6 +79,7 @@ export interface RevealVotesPayload {
 
 export interface NextRoundPayload {
   roomId: string;
+  userId: string;
 }
 
 export interface UpdateSettingsPayload {

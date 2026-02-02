@@ -40,6 +40,12 @@ export default function RoomPage() {
       socketService.onRoomUpdate((payload: RoomUpdatePayload) => {
         console.log('📡 Room update received:', payload.room);
         setRoom(payload.room);
+        
+        // Reset selected card when moving to a new voting round
+        const currentRound = payload.room.rounds[payload.room.currentRoundIndex];
+        if (currentRound?.status === 'voting' && currentRound.votes.length === 0) {
+          setSelectedCard(null);
+        }
       });
 
       // Listen for new users joining
@@ -323,7 +329,28 @@ export default function RoomPage() {
               )}
             </>
           ) : (
-            <VotingResults votes={currentRound?.votes || []} />
+            <>
+              <VotingResults votes={currentRound?.votes || []} />
+              
+              {/* Next Round Button (Host Only) */}
+              {isCurrentUserHost() && (
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  {room.currentRoundIndex < room.rounds.length - 1 ? (
+                    <button
+                      onClick={() => socketService.nextRound({ roomId: roomId!, userId: currentUserId! })}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+                    >
+                      Next Round →
+                    </button>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-green-600 font-semibold text-lg">🎉 All Rounds Complete!</p>
+                      <p className="text-gray-600 text-sm mt-2">Session has ended</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
