@@ -1,16 +1,6 @@
 /**
  * Shared TypeScript types for PlanitPoker
- * 
- * ⚠️ REFERENCE ONLY - NOT USED IN DEPLOYMENT
- * 
- * This file serves as the source of truth for shared types.
- * The actual types used by the application are copied to:
- * - client/src/types.ts (for frontend)
- * - server/src/types.ts (for backend)
- * 
- * When updating types, remember to manually sync changes to both locations.
- * This is required for Render.com deployment as services cannot access
- * files outside their root directory.
+ * Used by both client and server to ensure type safety
  */
 
 // ==================== Room Types ====================

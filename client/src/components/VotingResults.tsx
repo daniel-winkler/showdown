@@ -1,5 +1,5 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import type { Vote } from '@shared/types';
+import type { Vote } from '../types';
 
 interface VotingResultsProps {
   votes: Vote[];

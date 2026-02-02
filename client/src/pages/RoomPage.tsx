@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { socketService } from '../services/socket';
 import { StorageService } from '../utils/storage';
 import VotingResults from '../components/VotingResults';
-import type { Room, RoomUpdatePayload } from '@shared/types';
+import type { Room, RoomUpdatePayload } from '../types';
 
 export default function RoomPage() {
   const { roomId } = useParams<{ roomId: string }>();

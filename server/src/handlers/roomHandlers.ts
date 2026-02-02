@@ -8,7 +8,7 @@ import type {
   SubmitVotePayload,
   RoomUpdatePayload,
   NextRoundPayload,
-} from '../../../shared/types';
+} from '../types.js';
 
 export function registerRoomHandlers(socket: Socket, io: Server) {
   // Handle room creation

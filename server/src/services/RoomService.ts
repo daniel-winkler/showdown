@@ -5,7 +5,7 @@ import type {
   Participant,
   CreateRoomPayload,
   RoomSettings,
-} from '../../../shared/types';
+} from '../types.js';
 
 // Default settings
 const DEFAULT_ROOM_SETTINGS: RoomSettings = {

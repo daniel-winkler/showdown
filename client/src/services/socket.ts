@@ -6,7 +6,7 @@ import type {
   JoinRoomResponse,
   SubmitVotePayload,
   RoomUpdatePayload,
-} from '@shared/types';
+} from '../types';
 
 class SocketService {
   private socket: Socket | null = null;
