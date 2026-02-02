@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { socketService } from '../services/socket';
 import { StorageService } from '../utils/storage';
+import VotingResults from '../components/VotingResults';
 import type { Room, RoomUpdatePayload } from '@shared/types';
 
 export default function RoomPage() {
@@ -305,9 +306,7 @@ export default function RoomPage() {
               </p>
             </>
           ) : (
-            <p className="text-gray-600 text-center">
-              Results reveal coming in next commit...
-            </p>
+            <VotingResults votes={room.rounds[room.currentRoundIndex]?.votes || []} />
           )}
         </div>
       </div>
