@@ -124,7 +124,7 @@ export default function RoomPage() {
     const link = window.location.href;
     navigator.clipboard.writeText(link);
     setLinkCopied(true);
-    setTimeout(() => setLinkCopied(false), 2000); // Reset after 2 seconds
+    setTimeout(() => setLinkCopied(false), 1200); // Reset after 2 seconds
   };
 
   // Name input modal
@@ -224,16 +224,16 @@ export default function RoomPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => navigate('/')}
-                className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 text-sm"
+                className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 w-32 rounded-lg transition duration-200 text-sm"
               >
                 + New Room
               </button>
               <button
                 onClick={handleCopyLink}
-                className={`font-semibold py-2 px-4 rounded-lg transition duration-200 text-sm ${
+                className={`font-semibold py-2 px-4 w-32 rounded-lg transition duration-200 text-sm text-white ${
                   linkCopied
-                    ? 'bg-green-600 hover:bg-green-700 text-white'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    ? 'bg-green-600 hover:bg-green-700'
+                    : 'bg-blue-600 hover:bg-blue-700'
                 }`}
               >
                 {linkCopied ? '✓ Copied!' : '📋 Copy Link'}
