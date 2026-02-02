@@ -249,14 +249,21 @@ export default function RoomPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {room.participants.map((participant) => {
               const hasVoted = currentRound?.votes.some(v => v.userId === participant.id);
+              const isCurrentUser = participant.id === currentUserId;
               
               return (
                 <div
                   key={participant.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  className={`flex items-center justify-between p-3 rounded-lg ${
+                    isCurrentUser 
+                      ? 'bg-blue-50' 
+                      : 'bg-gray-50'
+                  }`}
                 >
                   <div className="flex items-center">
-                    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold mr-3 relative">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold mr-3 relative ${
+                      isCurrentUser ? 'bg-blue-600' : 'bg-blue-500'
+                    }`}>
                       {participant.name.charAt(0).toUpperCase()}
                       {/* Online status indicator */}
                       <div
@@ -269,6 +276,11 @@ export default function RoomPage() {
                     <div>
                       <p className="font-medium text-gray-800">
                         {participant.name}
+                        {isCurrentUser && (
+                          <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-semibold">
+                            You
+                          </span>
+                        )}
                         {participant.isCreator && (
                           <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">
                             Host
