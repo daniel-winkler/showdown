@@ -113,6 +113,17 @@ class SocketService {
   }
 
   /**
+   * Reveals votes for the current round (host only)
+   */
+  revealVotes(payload: { roomId: string; userId: string }): void {
+    if (!this.socket) {
+      console.error('Socket not connected');
+      return;
+    }
+    this.socket.emit('reveal-votes', payload);
+  }
+
+  /**
    * Listens for room updates
    */
   onRoomUpdate(callback: (payload: RoomUpdatePayload) => void): void {

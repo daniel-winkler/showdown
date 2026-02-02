@@ -72,6 +72,11 @@ export interface SubmitVotePayload {
   vote: number;
 }
 
+export interface RevealVotesPayload {
+  roomId: string;
+  userId: string;
+}
+
 export interface NextRoundPayload {
   roomId: string;
 }
@@ -137,6 +142,7 @@ export const SOCKET_EVENTS = {
   CREATE_ROOM: 'create-room',
   JOIN_ROOM: 'join-room',
   SUBMIT_VOTE: 'submit-vote',
+  REVEAL_VOTES: 'reveal-votes',
   NEXT_ROUND: 'next-round',
   UPDATE_SETTINGS: 'update-settings',
   LEAVE_ROOM: 'leave-room',

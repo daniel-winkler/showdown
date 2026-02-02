@@ -155,20 +155,45 @@ export function registerRoomHandlers(socket: Socket, io: Server) {
       const updatePayload: RoomUpdatePayload = { room };
       io.to(payload.roomId).emit('room-update', updatePayload);
 
-      // Check if all participants have voted
+      // Log if all participants have voted (host can now reveal)
       if (roomService.allVoted(payload.roomId)) {
-        console.log(`✅ All participants voted in room ${payload.roomId}`);
-        
-        // Auto-reveal votes
-        const updatedRoom = roomService.revealVotes(payload.roomId);
-        if (updatedRoom) {
-          const revealPayload: RoomUpdatePayload = { room: updatedRoom };
-          io.to(payload.roomId).emit('room-update', revealPayload);
-        }
+        console.log(`✅ All participants voted in room ${payload.roomId} - waiting for host to reveal`);
       }
     } catch (error) {
       console.error('Error submitting vote:', error);
       socket.emit('error', { message: 'Failed to submit vote' });
+    }
+  });
+
+  // Handle reveal votes (host only)
+  socket.on('reveal-votes', (payload: { roomId: string; userId: string }) => {
+    try {
+      console.log(`👁️  Reveal votes request for room ${payload.roomId}`);
+
+      // Get the room
+      const room = roomService.getRoom(payload.roomId);
+      if (!room) {
+        socket.emit('error', { message: 'Room not found' });
+        return;
+      }
+
+      // Check if the user is the creator (host)
+      const participant = room.participants.find(p => p.id === payload.userId);
+      if (!participant || !participant.isCreator) {
+        socket.emit('error', { message: 'Only the host can reveal votes' });
+        return;
+      }
+
+      // Reveal votes
+      const updatedRoom = roomService.revealVotes(payload.roomId);
+      if (updatedRoom) {
+        console.log(`✅ Votes revealed for room ${payload.roomId}`);
+        const revealPayload: RoomUpdatePayload = { room: updatedRoom };
+        io.to(payload.roomId).emit('room-update', revealPayload);
+      }
+    } catch (error) {
+      console.error('Error revealing votes:', error);
+      socket.emit('error', { message: 'Failed to reveal votes' });
     }
   });
 }

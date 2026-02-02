@@ -198,6 +198,8 @@ export default function RoomPage() {
   // Room loaded successfully
   if (!room) return null;
 
+  const currentRound = room.rounds[room.currentRoundIndex];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-6xl mx-auto">
@@ -209,7 +211,7 @@ export default function RoomPage() {
                 {room.name || 'Planning Poker Room'}
               </h1>
               <p className="text-gray-600 text-sm mt-1">
-                Round {room.currentRoundIndex + 1} of {room.rounds.length}: {room.rounds[room.currentRoundIndex]?.name}
+                Round {room.currentRoundIndex + 1} of {room.rounds.length}: {currentRound?.name}
               </p>
             </div>
             <div className="flex gap-2">
@@ -240,7 +242,6 @@ export default function RoomPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {room.participants.map((participant) => {
-              const currentRound = room.rounds[room.currentRoundIndex];
               const hasVoted = currentRound?.votes.some(v => v.userId === participant.id);
               
               return (
@@ -281,7 +282,7 @@ export default function RoomPage() {
 
         {/* Voting Area */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          {room.rounds[room.currentRoundIndex]?.status === 'voting' ? (
+          {currentRound?.status === 'voting' ? (
             <>
               <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">
                 Select Your Card
@@ -304,14 +305,34 @@ export default function RoomPage() {
               <p className="text-center text-gray-600 mt-4 text-sm">
                 {selectedCard !== null ? `You selected: ${selectedCard}` : 'Choose a card to vote'}
               </p>
+
+              {/* Show Results Button (Host Only) */}
+              {isCurrentUserHost() && currentRound?.votes.length > 0 && (
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <button
+                    onClick={() => socketService.revealVotes({ roomId: roomId!, userId: currentUserId! })}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+                  >
+                    <span className="text-xl">👁️</span>
+                    Show Results
+                  </button>
+                  <p className="text-center text-gray-500 text-sm mt-2">
+                    {currentRound.votes.length} / {room.participants.length} participants have voted
+                  </p>
+                </div>
+              )}
             </>
           ) : (
-            <VotingResults votes={room.rounds[room.currentRoundIndex]?.votes || []} />
+            <VotingResults votes={currentRound?.votes || []} />
           )}
         </div>
       </div>
     </div>
   );
+
+  function isCurrentUserHost(): boolean {
+    return room?.participants.find(p => p.id === currentUserId)?.isCreator || false;
+  }
 
   function handleCardSelect(value: number) {
     if (!roomId || !currentUserId) return;
