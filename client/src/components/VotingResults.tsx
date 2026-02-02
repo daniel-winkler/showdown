@@ -62,15 +62,10 @@ export default function VotingResults({ votes }: VotingResultsProps) {
       </div>
 
       {/* Statistics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <div className="bg-blue-50 rounded-lg p-4 text-center">
           <p className="text-sm text-gray-600 mb-1">Average</p>
           <p className="text-2xl font-bold text-blue-600">{stats.average}</p>
-        </div>
-        
-        <div className="bg-green-50 rounded-lg p-4 text-center">
-          <p className="text-sm text-gray-600 mb-1">Median</p>
-          <p className="text-2xl font-bold text-green-600">{stats.median}</p>
         </div>
         
         <div className="bg-amber-50 rounded-lg p-4 text-center">
@@ -84,13 +79,13 @@ export default function VotingResults({ votes }: VotingResultsProps) {
         </div>
       </div>
 
-      {/* Most Common Vote */}
-      {stats.mostCommon && (
+      {/* Most Common Vote - only show if there's an actual most common (more than 1 vote) */}
+      {stats.mostCommon !== null && stats.mostCommonCount > 1 && (
         <div className="bg-indigo-50 rounded-lg p-4 text-center">
           <p className="text-sm text-gray-600 mb-1">Most Common Vote</p>
           <p className="text-3xl font-bold text-indigo-600">{stats.mostCommon}</p>
           <p className="text-sm text-gray-500 mt-1">
-            {distribution.find(d => d.value === stats.mostCommon)?.count} vote(s)
+            {stats.mostCommonCount} vote(s)
           </p>
         </div>
       )}
@@ -147,10 +142,10 @@ function calculateStatistics(votes: Vote[]) {
   if (votes.length === 0) {
     return {
       average: 0,
-      median: 0,
       min: 0,
       max: 0,
       mostCommon: null,
+      mostCommonCount: 0,
       consensus: false,
     };
   }
@@ -163,14 +158,6 @@ function calculateStatistics(votes: Vote[]) {
   const sum = values.reduce((acc, val) => acc + val, 0);
   const average = values.length > 0 ? Math.round((sum / values.length) * 10) / 10 : 0;
 
-  // Median
-  const mid = Math.floor(values.length / 2);
-  const median = values.length > 0
-    ? (values.length % 2 === 0
-      ? (values[mid - 1] + values[mid]) / 2
-      : values[mid])
-    : 0;
-
   // Min and Max
   const min = values.length > 0 ? values[0] : 0;
   const max = values.length > 0 ? values[values.length - 1] : 0;
@@ -182,7 +169,7 @@ function calculateStatistics(votes: Vote[]) {
     frequency.set(val, (frequency.get(val) || 0) + 1);
   });
   
-  let mostCommon: number | string | null = allValues[0];
+  let mostCommon: number | string | null = null;
   let maxFrequency = 0;
   frequency.forEach((count, value) => {
     if (count > maxFrequency) {
@@ -196,10 +183,10 @@ function calculateStatistics(votes: Vote[]) {
 
   return {
     average,
-    median,
     min,
     max,
     mostCommon,
+    mostCommonCount: maxFrequency,
     consensus,
   };
 }
