@@ -7,30 +7,9 @@ export default function CreateRoom() {
   const navigate = useNavigate();
   const [userName, setUserName] = useState(StorageService.getUserName() || '');
   const [roomName, setRoomName] = useState('');
-  const [numRounds, setNumRounds] = useState(3);
-  const [roundNames, setRoundNames] = useState<string[]>(
-    Array.from({ length: 3 }, (_, i) => `Round ${i + 1}`)
-  );
+  const [roundsText, setRoundsText] = useState('Round 1\nRound 2\nRound 3');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  const handleNumRoundsChange = (num: number) => {
-    setNumRounds(num);
-    setRoundNames((prev) => {
-      const newRounds = Array.from({ length: num }, (_, i) => 
-        prev[i] || `Round ${i + 1}`
-      );
-      return newRounds;
-    });
-  };
-
-  const handleRoundNameChange = (index: number, value: string) => {
-    setRoundNames((prev) => {
-      const updated = [...prev];
-      updated[index] = value;
-      return updated;
-    });
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,13 +20,24 @@ export default function CreateRoom() {
       return;
     }
 
+    // Parse rounds from textarea
+    const rounds = roundsText
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
+
+    if (rounds.length === 0) {
+      setError('Please enter at least one round');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const response = await socketService.createRoom({
         userName: userName.trim(),
         roomName: roomName.trim() || undefined,
-        roundNames: roundNames.map(name => name.trim() || 'Untitled Round'),
+        roundNames: rounds.map(name => name || 'Untitled Round'),
       });
 
       if (response.success && response.room && response.userId) {
@@ -108,39 +98,23 @@ export default function CreateRoom() {
               />
             </div>
 
-            {/* Number of Rounds */}
+            {/* Rounds */}
             <div>
-              <label htmlFor="numRounds" className="block text-sm font-medium text-gray-700 mb-2">
-                Number of Rounds
+              <label htmlFor="rounds" className="block text-sm font-medium text-gray-700 mb-2">
+                Rounds (one per line) *
               </label>
-              <input
-                type="number"
-                id="numRounds"
-                value={numRounds}
-                onChange={(e) => handleNumRoundsChange(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
-                min="1"
-                max="20"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              <textarea
+                id="rounds"
+                value={roundsText}
+                onChange={(e) => setRoundsText(e.target.value)}
+                placeholder="Round 1&#10;Round 2&#10;Round 3"
+                rows={6}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                required
               />
-            </div>
-
-            {/* Round Names */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Round Names
-              </label>
-              <div className="space-y-2 max-h-60 overflow-y-auto">
-                {roundNames.map((name, index) => (
-                  <input
-                    key={index}
-                    type="text"
-                    value={name}
-                    onChange={(e) => handleRoundNameChange(index, e.target.value)}
-                    placeholder={`Round ${index + 1}`}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                ))}
-              </div>
+              <p className="text-sm text-gray-500 mt-1">
+                {roundsText.split('\n').filter(line => line.trim().length > 0).length} round(s)
+              </p>
             </div>
 
             {/* Error Message */}
