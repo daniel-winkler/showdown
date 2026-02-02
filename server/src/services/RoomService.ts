@@ -15,6 +15,50 @@ const DEFAULT_ROOM_SETTINGS: RoomSettings = {
 
 class RoomService {
   private rooms: Map<string, Room> = new Map();
+  private readonly ROOM_EXPIRATION_MS = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+
+  constructor() {
+    // Start cleanup job that runs every hour
+    this.startCleanupJob();
+  }
+
+  /**
+   * Starts the automatic cleanup job
+   */
+  private startCleanupJob(): void {
+    // Run cleanup every hour
+    setInterval(() => {
+      this.cleanupExpiredRooms();
+    }, 60 * 60 * 1000); // 1 hour
+
+    console.log('🧹 Room cleanup job started (runs every hour)');
+  }
+
+  /**
+   * Cleans up rooms that have been inactive for more than 12 hours
+   */
+  private cleanupExpiredRooms(): void {
+    const now = Date.now();
+    const expiredRooms: string[] = [];
+
+    for (const [roomId, room] of this.rooms.entries()) {
+      const roomAge = now - new Date(room.createdAt).getTime();
+      
+      if (roomAge > this.ROOM_EXPIRATION_MS) {
+        expiredRooms.push(roomId);
+      }
+    }
+
+    if (expiredRooms.length > 0) {
+      expiredRooms.forEach(roomId => {
+        this.rooms.delete(roomId);
+        console.log(`🗑️  Deleted expired room: ${roomId}`);
+      });
+      console.log(`🧹 Cleanup complete: ${expiredRooms.length} room(s) deleted`);
+    } else {
+      console.log('🧹 Cleanup complete: No expired rooms found');
+    }
+  }
 
   /**
    * Creates a new room
