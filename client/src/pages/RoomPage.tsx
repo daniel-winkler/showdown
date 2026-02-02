@@ -18,6 +18,7 @@ export default function RoomPage() {
   const [selectedCard, setSelectedCard] = useState<number | string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [isSkipping, setIsSkipping] = useState(false);
 
   useEffect(() => {
     if (!roomId) {
@@ -300,7 +301,12 @@ export default function RoomPage() {
 
         {/* Voting Area */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          {currentRound?.status === 'voting' ? (
+          {room.status === 'completed' ? (
+            <div className="text-center py-8">
+              <p className="text-green-600 font-semibold text-2xl mb-2">🎉 All Rounds Complete!</p>
+              <p className="text-gray-600">Session has ended</p>
+            </div>
+          ) : currentRound?.status === 'voting' ? (
             <>
               <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">
                 Select Your Card
@@ -324,16 +330,39 @@ export default function RoomPage() {
                 {selectedCard !== null ? `You selected: ${selectedCard}` : 'Choose a card to vote'}
               </p>
 
-              {/* Show Results Button (Host Only) */}
-              {isCurrentUserHost() && currentRound?.votes.length > 0 && (
+              {/* Host Controls (Show Results + Skip) */}
+              {isCurrentUserHost() && (
                 <div className="mt-6 pt-6 border-t border-gray-200">
-                  <button
-                    onClick={() => socketService.revealVotes({ roomId: roomId!, userId: currentUserId! })}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2"
-                  >
-                    <span className="text-xl">👁️</span>
-                    Show Results
-                  </button>
+                  <div className="flex gap-3">
+                    {/* Show Results Button */}
+                    <button
+                      onClick={() => socketService.revealVotes({ roomId: roomId!, userId: currentUserId! })}
+                      disabled={currentRound?.votes.length === 0}
+                      className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+                    >
+                      <span className="text-xl">👁️</span>
+                      Show Results
+                    </button>
+                    
+                    {/* Skip Button */}
+                    <button
+                      onClick={handleSkipRound}
+                      disabled={isSkipping}
+                      className="flex-1 bg-yellow-500 hover:bg-yellow-600 disabled:bg-yellow-600 disabled:cursor-wait text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+                    >
+                      {isSkipping ? (
+                        <>
+                          <span className="text-xl">🔄</span>
+                          Skipping...
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-xl">⏩</span>
+                          Skip Round
+                        </>
+                      )}
+                    </button>
+                  </div>
                   <p className="text-center text-gray-500 text-sm mt-2">
                     {currentRound.votes.length} / {room.participants.length} participants have voted
                   </p>
@@ -382,5 +411,18 @@ export default function RoomPage() {
       userId: currentUserId,
       vote: value,
     });
+  }
+
+  function handleSkipRound() {
+    if (!roomId || !currentUserId || isSkipping) return;
+    
+    setIsSkipping(true);
+    
+    // Add a small delay for visual feedback
+    setTimeout(() => {
+      socketService.nextRound({ roomId, userId: currentUserId });
+      // Reset skipping state after a bit
+      setTimeout(() => setIsSkipping(false), 500);
+    }, 300);
   }
 }
