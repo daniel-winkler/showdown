@@ -1,7 +1,7 @@
 {
-  "name": "planitpoker-client",
+  "name": "showdown-client",
   "version": "1.0.0",
-  "description": "Frontend for PlanitPoker",
+  "description": "Frontend for Showdown",
   "type": "module",
   "scripts": {
     "dev": "vite",

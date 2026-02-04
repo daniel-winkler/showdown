@@ -1,4 +1,4 @@
-# PlanitPoker
+# Showdown
 
 A real-time collaborative Planning Poker web application for agile development teams.
 
@@ -20,7 +20,7 @@ A real-time collaborative Planning Poker web application for agile development t
 ## Project Structure
 
 ```
-PlanitPoker/
+Showdown/
 ├── client/          # React frontend
 ├── server/          # Node.js backend
 ├── shared/          # Shared TypeScript types

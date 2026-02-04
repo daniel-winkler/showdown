@@ -1,5 +1,5 @@
 /**
- * Shared TypeScript types for PlanitPoker
+ * Shared TypeScript types for Showdown
  * Used by both client and server to ensure type safety
  */
 

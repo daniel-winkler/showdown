@@ -1,5 +1,5 @@
 /**
- * Shared TypeScript types for PlanitPoker
+ * Shared TypeScript types for Showdown
  * 
  * ⚠️ REFERENCE ONLY - NOT USED IN DEPLOYMENT
  * 
