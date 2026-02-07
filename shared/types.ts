@@ -15,7 +15,7 @@
 
 // ==================== Room Types ====================
 
-export type RoomStatus = 'waiting' | 'active' | 'completed';
+export type RoomStatus = 'waiting' | 'active';
 
 export type RoundStatus = 'voting' | 'revealed';
 
@@ -54,8 +54,8 @@ export interface Room {
   createdBy: string;             // Creator's user ID
   createdAt: Date;
   settings: RoomSettings;
-  rounds: Round[];
-  currentRoundIndex: number;     // 0-based index
+  currentRound: Round;           // Single round that resets
+  roundNumber: number;           // Counter for display (increments with each reset)
   status: RoomStatus;
   participants: Participant[];
 }
@@ -67,7 +67,6 @@ export interface Room {
 export interface CreateRoomPayload {
   userName: string;              // Creator's name
   roomName?: string;             // Optional room name
-  roundNames: string[];          // Names for each round
   settings?: Partial<RoomSettings>; // Optional custom settings
 }
 

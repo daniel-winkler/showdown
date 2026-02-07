@@ -43,7 +43,7 @@ export default function RoomPage() {
         setRoom(payload.room);
         
         // Reset selected card when moving to a new voting round
-        const currentRound = payload.room.rounds[payload.room.currentRoundIndex];
+        const currentRound = payload.room.currentRound;
         if (currentRound?.status === 'voting' && currentRound.votes.length === 0) {
           setSelectedCard(null);
         }
@@ -98,7 +98,7 @@ export default function RoomPage() {
         setLoading(false);
         
         // Restore selected card if user already voted
-        const currentRound = response.room.rounds[response.room.currentRoundIndex];
+        const currentRound = response.room.currentRound;
         const existingVote = currentRound?.votes.find(v => v.userId === response.userId);
         if (existingVote) {
           setSelectedCard(existingVote.value);
@@ -205,7 +205,7 @@ export default function RoomPage() {
   // Room loaded successfully
   if (!room) return null;
 
-  const currentRound = room.rounds[room.currentRoundIndex];
+  const currentRound = room.currentRound;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -218,7 +218,7 @@ export default function RoomPage() {
                 {room.name || 'Planning Poker Room'}
               </h1>
               <p className="text-gray-600 text-sm mt-1">
-                Round {room.currentRoundIndex + 1} of {room.rounds.length}: {currentRound?.name}
+                Round #{room.roundNumber}
               </p>
             </div>
             <div className="flex gap-2">
@@ -301,12 +301,7 @@ export default function RoomPage() {
 
         {/* Voting Area */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          {room.status === 'completed' ? (
-            <div className="text-center py-8">
-              <p className="text-green-600 font-semibold text-2xl mb-2">🎉 All Rounds Complete!</p>
-              <p className="text-gray-600">Session has ended</p>
-            </div>
-          ) : currentRound?.status === 'voting' ? (
+          {currentRound?.status === 'voting' ? (
             <>
               <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">
                 Select Your Card
@@ -376,19 +371,13 @@ export default function RoomPage() {
               {/* Next Round Button (Host Only) */}
               {isCurrentUserHost() && (
                 <div className="mt-6 pt-6 border-t border-gray-200">
-                  {room.currentRoundIndex < room.rounds.length - 1 ? (
-                    <button
-                      onClick={() => socketService.nextRound({ roomId: roomId!, userId: currentUserId! })}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2"
-                    >
-                      Next Round →
-                    </button>
-                  ) : (
-                    <div className="text-center py-4">
-                      <p className="text-green-600 font-semibold text-lg">🎉 All Rounds Complete!</p>
-                      <p className="text-gray-600 text-sm mt-2">Session has ended</p>
-                    </div>
-                  )}
+                  <button
+                    onClick={() => socketService.nextRound({ roomId: roomId!, userId: currentUserId! })}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+                  >
+                    <span className="text-xl">🔄</span>
+                    New Round
+                  </button>
                 </div>
               )}
             </>

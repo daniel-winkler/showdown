@@ -26,15 +26,6 @@ export function registerRoomHandlers(socket: Socket, io: Server) {
         return;
       }
 
-      if (!payload.roundNames || payload.roundNames.length === 0) {
-        const response: RoomCreatedResponse = {
-          success: false,
-          error: 'At least one round is required',
-        };
-        callback(response);
-        return;
-      }
-
       // Create the room
       const { room, userId } = roomService.createRoom(payload);
 

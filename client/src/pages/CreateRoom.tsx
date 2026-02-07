@@ -7,7 +7,6 @@ export default function CreateRoom() {
   const navigate = useNavigate();
   const [userName, setUserName] = useState(StorageService.getUserName() || '');
   const [roomName, setRoomName] = useState('');
-  const [roundsText, setRoundsText] = useState('Round 1\nRound 2\nRound 3');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -20,24 +19,12 @@ export default function CreateRoom() {
       return;
     }
 
-    // Parse rounds from textarea
-    const rounds = roundsText
-      .split('\n')
-      .map(line => line.trim())
-      .filter(line => line.length > 0);
-
-    if (rounds.length === 0) {
-      setError('Please enter at least one round');
-      return;
-    }
-
     setLoading(true);
 
     try {
       const response = await socketService.createRoom({
         userName: userName.trim(),
         roomName: roomName.trim() || undefined,
-        roundNames: rounds.map(name => name || 'Untitled Round'),
       });
 
       if (response.success && response.room && response.userId) {
@@ -96,25 +83,6 @@ export default function CreateRoom() {
                 placeholder="e.g., Sprint 24 Planning"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-            </div>
-
-            {/* Rounds */}
-            <div>
-              <label htmlFor="rounds" className="block text-sm font-medium text-gray-700 mb-2">
-                Rounds (one per line) *
-              </label>
-              <textarea
-                id="rounds"
-                value={roundsText}
-                onChange={(e) => setRoundsText(e.target.value)}
-                placeholder="Round 1&#10;Round 2&#10;Round 3"
-                rows={6}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
-                required
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                {roundsText.split('\n').filter(line => line.trim().length > 0).length} round(s)
-              </p>
             </div>
 
             {/* Error Message */}

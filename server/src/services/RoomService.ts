@@ -77,13 +77,13 @@ class RoomService {
       socketId: undefined, // Will be set when socket joins
     };
 
-    // Create rounds
-    const rounds: Round[] = payload.roundNames.map((name) => ({
+    // Create a single round (that will be reset for each new round)
+    const initialRound: Round = {
       id: uuidv4(),
-      name,
+      name: 'Planning Round',
       status: 'voting' as const,
       votes: [],
-    }));
+    };
 
     // Merge default settings with user settings
     const settings: RoomSettings = {
@@ -98,8 +98,8 @@ class RoomService {
       createdBy: userId,
       createdAt: new Date(),
       settings,
-      rounds,
-      currentRoundIndex: 0,
+      currentRound: initialRound,
+      roundNumber: 1,
       status: 'waiting',
       participants: [creator],
     };
@@ -227,7 +227,7 @@ class RoomService {
       return null;
     }
 
-    const currentRound = room.rounds[room.currentRoundIndex];
+    const currentRound = room.currentRound;
     if (!currentRound) {
       return null;
     }
@@ -270,7 +270,7 @@ class RoomService {
     const room = this.rooms.get(roomId);
     if (!room) return false;
 
-    const currentRound = room.rounds[room.currentRoundIndex];
+    const currentRound = room.currentRound;
     if (!currentRound) return false;
 
     return currentRound.votes.length === room.participants.length;
@@ -285,7 +285,7 @@ class RoomService {
       return null;
     }
 
-    const currentRound = room.rounds[room.currentRoundIndex];
+    const currentRound = room.currentRound;
     if (!currentRound) {
       return null;
     }
@@ -299,7 +299,7 @@ class RoomService {
   }
 
   /**
-   * Advances to the next round
+   * Resets the current round (starts a new round)
    */
   nextRound(roomId: string): Room | null {
     const room = this.rooms.get(roomId);
@@ -307,23 +307,18 @@ class RoomService {
       return null;
     }
 
-    // Check if there are more rounds
-    if (room.currentRoundIndex >= room.rounds.length - 1) {
-      // Last round - mark room as completed
-      room.status = 'completed';
-      console.log(`🏁 All rounds completed in room ${roomId}`);
-      return room;
-    }
+    // Increment round number for display
+    room.roundNumber++;
 
-    // Move to next round
-    room.currentRoundIndex++;
-    const nextRound = room.rounds[room.currentRoundIndex];
-    
-    // Reset round status to voting
-    nextRound.status = 'voting';
-    nextRound.votes = [];
+    // Reset the current round
+    room.currentRound = {
+      id: uuidv4(),
+      name: 'Planning Round',
+      status: 'voting',
+      votes: [],
+    };
 
-    console.log(`➡️  Moved to round ${room.currentRoundIndex + 1} in room ${roomId}`);
+    console.log(`🔄 Reset to round ${room.roundNumber} in room ${roomId}`);
 
     return room;
   }
