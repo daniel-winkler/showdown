@@ -221,7 +221,7 @@ export default function RoomPage() {
                 Round #{room.roundNumber}
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap justify-end">
               <button
                 onClick={() => navigate('/')}
                 className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 w-32 rounded-lg transition duration-200 text-sm"
