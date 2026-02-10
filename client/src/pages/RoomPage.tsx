@@ -212,7 +212,7 @@ export default function RoomPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-4">
-          <div className="flex items-center justify-between">
+          <div className="flex gap-2 items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-800">
                 {room.name || 'Planning Poker Room'}
