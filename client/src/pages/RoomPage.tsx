@@ -256,9 +256,7 @@ export default function RoomPage() {
                 <div
                   key={participant.id}
                   className={`flex items-center justify-between p-3 rounded-lg ${
-                    isCurrentUser 
-                      ? 'bg-blue-50' 
-                      : 'bg-gray-50'
+                    hasVoted ? 'bg-green-50' : (isCurrentUser ? 'bg-blue-50' : 'bg-gray-50')
                   }`}
                 >
                   <div className="flex items-center">
