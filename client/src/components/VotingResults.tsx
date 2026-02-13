@@ -1,4 +1,4 @@
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, TooltipProps } from 'recharts';
 import type { Vote } from '../types';
 
 interface VotingResultsProps {
@@ -177,7 +177,7 @@ function renderCustomLabel(entry: VoteDistribution) {
 }
 
 // Custom tooltip for pie chart
-function CustomTooltip({ active, payload }: any) {
+function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
   if (active && payload && payload.length) {
     const data = payload[0].payload as VoteDistribution;
     return (
