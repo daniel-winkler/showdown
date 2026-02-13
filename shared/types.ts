@@ -138,7 +138,7 @@ export interface VoteStatistics {
 
 // ==================== Constants ====================
 
-export const DEFAULT_CARD_VALUES = [0.5, 1, 3, 5, 8, 13, 21, '☕', '?'];
+export const DEFAULT_CARD_VALUES = [0.5, 1, 2, 3, 5, 8, '☕', '?'];
 
 export const DEFAULT_ROOM_SETTINGS: RoomSettings = {
   anonymous: false,

@@ -10,7 +10,7 @@ import type {
 // Default settings
 const DEFAULT_ROOM_SETTINGS: RoomSettings = {
   anonymous: false,
-  cardValues: [0.5, 1, 3, 5, 8, 13, 21, '☕', '?'],
+  cardValues: [0.5, 1, 2, 3, 5, 8, '☕', '?'],
 };
 
 class RoomService {
