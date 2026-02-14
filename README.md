@@ -5,11 +5,9 @@ A real-time collaborative Planning Poker web application for agile development t
 ## Features
 
 - Create poker rooms with shareable links
-- Real-time voting with Fibonacci sequence cards (1, 3, 5, 8, 13, 21)
+- Real-time voting with Fibonacci sequence cards (1, 2, 3, 5, 8,...)
 - Visual results with charts
-- Multiple rounds with custom names
-- Anonymous or named voting modes
-- Export results to CSV/JSON
+- Unlimited voting rounds
 
 ## Tech Stack
 
@@ -65,12 +63,11 @@ npm run dev
 
 ## Usage
 
-1. Create a new poker room and set up rounds
+1. Create a new poker room
 2. Share the room link with your team
 3. Each member selects a card value
 4. When everyone votes, results are revealed
 5. Move to the next round and repeat
-6. Export results when finished
 
 ## License
 
