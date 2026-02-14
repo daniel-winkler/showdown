@@ -80,7 +80,7 @@ export default function CreateRoom() {
                 id="roomName"
                 value={roomName}
                 onChange={(e) => setRoomName(e.target.value)}
-                placeholder="e.g., Sprint 24 Planning"
+                placeholder="e.g., Sprint 26 Planning"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>

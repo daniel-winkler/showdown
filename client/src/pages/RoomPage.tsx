@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { socketService } from '../services/socket';
 import { StorageService } from '../utils/storage';
@@ -19,6 +19,41 @@ export default function RoomPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const [isSkipping, setIsSkipping] = useState(false);
+
+  const joinRoom = useCallback(async (name: string) => {
+    if (!roomId) return;
+
+    setJoiningRoom(true);
+    setError('');
+
+    try {
+      const response = await socketService.joinRoom({
+        roomId,
+        userName: name.trim(),
+      });
+
+      if (response.success && response.room && response.userId) {
+        setRoom(response.room);
+        setCurrentUserId(response.userId);
+        StorageService.saveUserName(name.trim());
+        StorageService.saveUserId(response.userId);
+        StorageService.addRecentRoom(roomId);
+        setShowNameModal(false);
+        setLoading(false);
+        
+        // Restore selected card if user already voted
+        const currentRound = response.room.currentRound;
+        const existingVote = currentRound?.votes.find(v => v.userId === response.userId);
+        if (existingVote) {
+          setSelectedCard(existingVote.value);
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to join room');
+      setLoading(false);
+      setJoiningRoom(false);
+    }
+  }, [roomId]);
 
   useEffect(() => {
     if (!roomId) {
@@ -74,42 +109,7 @@ export default function RoomPage() {
     return () => {
       socketService.removeAllListeners();
     };
-  }, [roomId]);
-
-  const joinRoom = async (name: string) => {
-    if (!roomId) return;
-
-    setJoiningRoom(true);
-    setError('');
-
-    try {
-      const response = await socketService.joinRoom({
-        roomId,
-        userName: name.trim(),
-      });
-
-      if (response.success && response.room && response.userId) {
-        setRoom(response.room);
-        setCurrentUserId(response.userId);
-        StorageService.saveUserName(name.trim());
-        StorageService.saveUserId(response.userId);
-        StorageService.addRecentRoom(roomId);
-        setShowNameModal(false);
-        setLoading(false);
-        
-        // Restore selected card if user already voted
-        const currentRound = response.room.currentRound;
-        const existingVote = currentRound?.votes.find(v => v.userId === response.userId);
-        if (existingVote) {
-          setSelectedCard(existingVote.value);
-        }
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to join room');
-      setLoading(false);
-      setJoiningRoom(false);
-    }
-  };
+  }, [roomId, joinRoom, navigate]);
 
   const handleJoinSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,7 +124,7 @@ export default function RoomPage() {
     const link = window.location.href;
     navigator.clipboard.writeText(link);
     setLinkCopied(true);
-    setTimeout(() => setLinkCopied(false), 1200); // Reset after 2 seconds
+    setTimeout(() => setLinkCopied(false), 1200); // Reset after 1.2 seconds
   };
 
   // Name input modal
@@ -408,8 +408,7 @@ export default function RoomPage() {
     // Add a small delay for visual feedback
     setTimeout(() => {
       socketService.nextRound({ roomId, userId: currentUserId });
-      // Reset skipping state after a bit
-      setTimeout(() => setIsSkipping(false), 500);
-    }, 300);
+      setIsSkipping(false);
+    }, 500);
   }
 }
