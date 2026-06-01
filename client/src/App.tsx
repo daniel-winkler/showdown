@@ -1,10 +1,14 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { socketService } from './services/socket';
+import { useKeepAlive } from './hooks/useKeepAlive';
 import CreateRoom from './pages/CreateRoom';
 import RoomPage from './pages/RoomPage';
 
 export default function App() {
+  // Keep server alive with periodic pings
+  useKeepAlive();
+
   useEffect(() => {
     // Connect to server on app mount
     socketService.connect();

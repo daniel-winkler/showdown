@@ -8,6 +8,7 @@ A real-time collaborative Planning Poker web application for agile development t
 - Real-time voting with Fibonacci sequence cards (1, 2, 3, 5, 8,...)
 - Visual results with charts
 - Unlimited voting rounds
+- Automatic keep-alive pings to prevent server spin-down
 
 ## Tech Stack
 
@@ -60,6 +61,20 @@ npm run dev
 ```
 
 3. Open your browser to `http://localhost:5173`
+
+### Environment Variables
+
+You can configure the server URL by creating a `.env` file in the `client` directory:
+
+```bash
+VITE_SOCKET_URL=http://localhost:3001
+```
+
+In production, set this to your deployed server URL.
+
+### Keep-Alive Feature
+
+The app automatically pings the server every 60 seconds to prevent it from spinning down due to inactivity (common on free-tier hosting platforms like Render, Railway, etc.). This happens silently in the background whenever the app is open in a browser.
 
 ## Usage
 
